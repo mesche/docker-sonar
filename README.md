@@ -44,6 +44,14 @@ Sonar needs PostgreSQL database to be able to connect to and creade default data
 | ------------- | ------------- | ------------- |
 | SonarQube | http://docker.ip}:9000 | admin/admin |
 
+### Plugins
+List of installed plugins:  
+`sonar-java-plugin`  
+`sonar-web-plugin`  
+`sonar-scm-git-plugin`  
+`sonar-github-plugin`  
+**Please see [`Dockerfile`](https://github.com/million12/docker-sonar/blob/master/Dockerfile) for specific plugin version**
+
 ### Docker troubleshooting
 
 Use docker command to see if all required containers are up and running:
