@@ -1,0 +1,22 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  pre:
+    - docker pull postgres
+  post:
+    - docker build -t million12/sonar .
+
+test:
+  override:
+    - docker run -d --name sonar-db -e POSTGRES_USER=sonar -e POSTGRES_PASSWORD=sonar postgres
+    - docker logs -f sonar-db | tee -a ${CIRCLE_ARTIFACTS}/sonar-db.log:
+        background: true
+    - while true; do if grep "database system is ready to accept connections" -a ${CIRCLE_ARTIFACTS}/sonar-db.log; then break; else sleep 1; fi done
+    - docker run -d --name sonar -p 80:9000 --link sonar-db:sonar.db -e SONARQUBE_JDBC_URL=jdbc:postgresql://sonar.db:5432/sonar -e SONARQUBE_JDBC_USERNAME=sonar -e SONARQUBE_JDBC_PASSWORD=sonar million12/sonar
+    - docker logs -f sonar | tee -a ${CIRCLE_ARTIFACTS}/sonar.log:
+        background: true
+    - while true; do if grep "Web server is started" -a ${CIRCLE_ARTIFACTS}/sonar.log; then break; else sleep 1; fi done
+    # Check if web-interface accessible
+    - curl -s -L --head http://127.0.0.1/ | grep "HTTP/1.1 200 OK"
